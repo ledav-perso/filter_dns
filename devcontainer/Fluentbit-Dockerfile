@@ -1,0 +1,60 @@
+FROM ubuntu:noble
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y openssh-server sudo && \
+    mkdir /var/run/sshd
+
+# Création de l'utilisateur david
+RUN useradd -m -s /bin/bash david && \
+    usermod -aG sudo david && \
+    mkdir -p /home/david/.ssh && \
+    chown david:david /home/david/.ssh && \
+    chmod 700 /home/david/.ssh
+
+# Copie de la clé publique (on la placera via le docker-compose)
+COPY authorized_keys /home/david/.ssh/authorized_keys
+
+RUN chown david:david /home/david/.ssh/authorized_keys && \
+    chmod 600 /home/david/.ssh/authorized_keys && \
+    echo 'PasswordAuthentication no' >> /etc/ssh/sshd_config && \
+    echo 'PermitRootLogin no' >> /etc/ssh/sshd_config && \
+    echo 'PubkeyAuthentication yes' >> /etc/ssh/sshd_config
+
+# Autoriser sudo sans mot de passe pour l'utilisateur david
+RUN echo 'david ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/david && \
+    chmod 440 /etc/sudoers.d/david
+
+# installation des dépendances fluent-bit
+RUN apt-get install -y git \
+    cmake \
+    make \
+    gcc \
+    g++ \
+    flex \
+    bison \
+    libyaml-dev \
+    libssl-dev \
+    libcmocka-dev \
+    pkg-config \
+    curl \
+    wget \
+    unzip \
+    ca-certificates
+
+
+USER david
+RUN mkdir -p /home/david/sources
+WORKDIR /home/david/sources
+
+RUN git clone https://github.com/fluent/fluent-bit.git && \
+    cd fluent-bit/build && \
+    cmake .. && \
+    make -j$(nproc)
+
+USER root
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D"]

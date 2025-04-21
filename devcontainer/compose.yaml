@@ -1,0 +1,16 @@
+services:
+  ubuntu:
+    build:
+      dockerfile: Fluentbit-Dockerfile
+    container_name: fluentbit-container
+    ports:
+      - "2022:22"
+    tty: true
+    stdin_open: true
+    volumes:
+      - devcontainer_data:/home/david
+    command: >
+      bash -c "chown -R david:david /home/david && exec /usr/sbin/sshd -D"
+
+volumes:
+  devcontainer_data:
