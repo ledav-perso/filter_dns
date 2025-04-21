@@ -1,30 +1,34 @@
 FROM ubuntu:noble
 
+ARG LINUX_USER_NAME
+ARG GIT_USER_NAME
+ARG GIT_USER_EMAIL
+
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y openssh-server sudo && \
     mkdir /var/run/sshd
 
-# Création de l'utilisateur david
-RUN useradd -m -s /bin/bash david && \
-    usermod -aG sudo david && \
-    mkdir -p /home/david/.ssh && \
-    chown david:david /home/david/.ssh && \
-    chmod 700 /home/david/.ssh
+# Création de l'utilisateur Linux
+RUN useradd -m -s /bin/bash ${LINUX_USER_NAME} && \
+    usermod -aG sudo ${LINUX_USER_NAME} && \
+    mkdir -p /home/${LINUX_USER_NAME}/.ssh && \
+    chown ${LINUX_USER_NAME}:${LINUX_USER_NAME} /home/${LINUX_USER_NAME}/.ssh && \
+    chmod 700 /home/${LINUX_USER_NAME}/.ssh
 
-# Copie de la clé publique (on la placera via le docker-compose)
-COPY authorized_keys /home/david/.ssh/authorized_keys
+# Copie de la clé publique (on la placera via le docker compose)
+COPY authorized_keys /home/${LINUX_USER_NAME}/.ssh/authorized_keys
 
-RUN chown david:david /home/david/.ssh/authorized_keys && \
-    chmod 600 /home/david/.ssh/authorized_keys && \
+RUN chown ${LINUX_USER_NAME}:${LINUX_USER_NAME} /home/${LINUX_USER_NAME}/.ssh/authorized_keys && \
+    chmod 600 /home/${LINUX_USER_NAME}/.ssh/authorized_keys && \
     echo 'PasswordAuthentication no' >> /etc/ssh/sshd_config && \
     echo 'PermitRootLogin no' >> /etc/ssh/sshd_config && \
     echo 'PubkeyAuthentication yes' >> /etc/ssh/sshd_config
 
-# Autoriser sudo sans mot de passe pour l'utilisateur david
-RUN echo 'david ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/david && \
-    chmod 440 /etc/sudoers.d/david
+# Autoriser sudo sans mot de passe pour l'utilisateur ${LINUX_USER_NAME}
+RUN echo '${LINUX_USER_NAME} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/${LINUX_USER_NAME} && \
+    chmod 440 /etc/sudoers.d/${LINUX_USER_NAME}
 
 # installation des dépendances fluent-bit
 RUN apt-get install -y git \
@@ -44,9 +48,11 @@ RUN apt-get install -y git \
     ca-certificates
 
 
-USER david
-RUN mkdir -p /home/david/sources
-WORKDIR /home/david/sources
+USER ${LINUX_USER_NAME}
+RUN mkdir -p /home/${LINUX_USER_NAME}/sources && \
+    git config --global user.name "${GIT_USER_NAME} "&& \
+    git config --global user.email ${GIT_USER_EMAIL}
+WORKDIR /home/${LINUX_USER_NAME}/sources
 
 RUN git clone https://github.com/fluent/fluent-bit.git && \
     cd fluent-bit/build && \

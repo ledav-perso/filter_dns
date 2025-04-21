@@ -2,15 +2,23 @@ services:
   ubuntu:
     build:
       dockerfile: Fluentbit-Dockerfile
+      args:
+        LINUX_USER_NAME: ${LINUX_USER_NAME:?error}
+        GIT_USER_NAME: ${GIT_USER_NAME:?error}
+        GIT_USER_EMAIL: ${GIT_USER_EMAIL:?error}
     container_name: fluentbit-container
     ports:
       - "2022:22"
     tty: true
     stdin_open: true
+    environment:
+      - LINUX_USER_NAME=${LINUX_USER_NAME:?error}
+      - GIT_USER_NAME=${GIT_USER_NAME:?error}
+      - GIT_USER_EMAIL=${GIT_USER_EMAIL:?error}
     volumes:
-      - devcontainer_data:/home/david
+      - data:/home/${LINUX_USER_NAME}
     command: >
-      bash -c "chown -R david:david /home/david && exec /usr/sbin/sshd -D"
+      bash -c "chown -R ${LINUX_USER_NAME}:${LINUX_USER_NAME} /home/${LINUX_USER_NAME} && exec /usr/sbin/sshd -D"
 
 volumes:
-  devcontainer_data:
+  data:
