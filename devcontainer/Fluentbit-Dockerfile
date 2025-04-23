@@ -27,7 +27,7 @@ RUN chown ${LINUX_USER_NAME}:${LINUX_USER_NAME} /home/${LINUX_USER_NAME}/.ssh/au
     echo 'PubkeyAuthentication yes' >> /etc/ssh/sshd_config
 
 # Autoriser sudo sans mot de passe pour l'utilisateur ${LINUX_USER_NAME}
-RUN echo '${LINUX_USER_NAME} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/${LINUX_USER_NAME} && \
+RUN echo "${LINUX_USER_NAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${LINUX_USER_NAME} && \
     chmod 440 /etc/sudoers.d/${LINUX_USER_NAME}
 
 # installation des dépendances fluent-bit

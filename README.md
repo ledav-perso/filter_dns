@@ -1,6 +1,10 @@
 # filter_dns
 Fluent-bit C Plugin : reverse DNS lookup of IP v4 addresses
 
+references :
+- https://howtos.davidsebek.com/vscodium-containers.html
+- https://blog.ukjae.io/posts/implement-custom-plugin-to-fluent-bit/
+
 ## Fluent Bit Filter Plugin: DNS Lookup avec TTL
 ```
 [FILTER]

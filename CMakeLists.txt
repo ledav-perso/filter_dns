@@ -3,8 +3,10 @@ project(filter_dnslookup)
 
 set(CMAKE_C_STANDARD 99)
 
+add_subdirectory(../fluent-bit  ../fluent-bit/build)
+
 # Définir le répertoire d'installation de Fluent Bit
-set(FLB_DIR "../LOGS/fluent-bit/")
+set(FLB_DIR "../fluent-bit")
 
 # définir les fichiers sources
 set(SRC src/filter_dnslookup.c)
