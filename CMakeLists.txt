@@ -1,18 +1,17 @@
-cmake_minimum_required(VERSION 3.10)
-project(filter_dnslookup)
+# CMAKE version of Fluent-bit
+cmake_minimum_required(VERSION 3.12)
+project(filter_dnslookup C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_subdirectory(../fluent-bit  ../fluent-bit/build)
-
 # Définir le répertoire d'installation de Fluent Bit
-#set(FLB_DIR "../fluent-bit")
+set(FLB_DIR "../fluent-bit")
 
 # définir les fichiers sources
 set(SRC src/filter_dnslookup.c)
 
 # Inclure les répertoires nécessaires
-include_directories(${FLB_DIR}/include)
+include_directories(${FLB_DIR}/include ${FLB_DIR}/lib/monkey/include)
 
 # Ajouter le fichier source du plugin
 add_library(filter_dnslookup MODULE ${SRC})
